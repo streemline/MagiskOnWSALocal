@@ -38,9 +38,15 @@ print(
 abi_map = {"x64": "x86_64", "arm64": "arm64"}
 android_api_map = {"30": "11.0", "32": "12.1", "33": "13.0"}
 release = android_api_map[android_api]
-if brand == "OpenGApps":
+if brand == "MindTheGapps":
+    res = requests.get(
+        f'https://sourceforge.net/projects/wsa-mtg/rss?path=/{abi_map[arch]}&limit=100')
+    link = re.search(f'https://.*{release}.*{abi_map[arch]}.*\.zip/download', res.text).group().replace(
+        '.zip/download', '.zip').replace('sourceforge.net/projects/wsa-mtg/files', 'downloads.sourceforge.net/project/wsa-mtg')
+
+elif brand == "OpenGApps":
     try:
-        res = requests.get(f"https://api.opengapps.org/list")
+        res = requests.get("https://api.opengapps.org/list")
         j = json.loads(res.content)
         link = {i["name"]: i for i in j["archs"][abi_map[arch]]
                 ["apis"][release]["variants"]}[variant]["zip"]
@@ -52,12 +58,6 @@ if brand == "OpenGApps":
             f'https://sourceforge.net/projects/opengapps/rss?path=/{abi_map[arch]}&limit=100')
         link = re.search(f'https://.*{abi_map[arch]}/.*{release}.*{variant}.*\.zip/download', res.text).group().replace(
             '.zip/download', '.zip').replace('sourceforge.net/projects/opengapps/files', 'downloads.sourceforge.net/project/opengapps')
-elif brand == "MindTheGapps":
-    res = requests.get(
-        f'https://sourceforge.net/projects/wsa-mtg/rss?path=/{abi_map[arch]}&limit=100')
-    link = re.search(f'https://.*{release}.*{abi_map[arch]}.*\.zip/download', res.text).group().replace(
-        '.zip/download', '.zip').replace('sourceforge.net/projects/wsa-mtg/files', 'downloads.sourceforge.net/project/wsa-mtg')
-
 print(f"download link: {link}", flush=True)
 
 with open(download_dir/tempScript, 'a') as f:
